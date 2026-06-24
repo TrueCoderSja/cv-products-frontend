@@ -1,101 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-
-// ---------------------------------------------------------------------------
-// Types (inlined from your api.ts)
-// ---------------------------------------------------------------------------
-
-export interface Category {
-  id: number | string;
-  name: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  createdAt: string;
-  category: Category;
-}
-
-export interface ProductsResponse {
-  data: Product[];
-  nextCursor: string | null;
-}
-
-export interface CategoriesResponse {
-  data: Category[];
-}
-
-export interface GetProductsParams {
-  limit?: number;
-  cursor?: string;
-  q?: string;
-  categoryId?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
-// ---------------------------------------------------------------------------
-// Mock API (replace with real imports from your api.ts)
-// ---------------------------------------------------------------------------
-
-const MOCK_CATEGORIES: Category[] = [
-  { id: "1", name: "Electronics" },
-  { id: "2", name: "Clothing" },
-  { id: "3", name: "Books" },
-  { id: "4", name: "Home & Garden" },
-  { id: "5", name: "Sports" },
-];
-
-const ALL_MOCK_PRODUCTS: Product[] = Array.from({ length: 47 }, (_, i) => ({
-  id: `prod-${String(i + 1).padStart(4, "0")}`,
-  name: [
-    "Wireless Noise-Cancelling Headphones",
-    "Merino Wool Crew Neck Sweater",
-    "The Pragmatic Programmer",
-    "Cast Iron Dutch Oven",
-    "Carbon Fibre Road Bike",
-    "Smart LED Desk Lamp",
-    "Slim Fit Chino Trousers",
-    "Clean Code: A Handbook",
-    "Bamboo Kitchen Utensil Set",
-    "Adjustable Dumbbell Set",
-    "Mechanical Keyboard TKL",
-    "Linen Button-Up Shirt",
-    "Designing Data-Intensive Applications",
-    "Ceramic Pour-Over Coffee Set",
-    "Running Shoes Pro 3",
-  ][i % 15],
-  createdAt: new Date(Date.now() - i * 86400000 * 3).toISOString(),
-  category: MOCK_CATEGORIES[i % MOCK_CATEGORIES.length],
-}));
-
-async function getProducts(params: GetProductsParams = {}): Promise<ProductsResponse> {
-  await new Promise((r) => setTimeout(r, 400));
-  let filtered = [...ALL_MOCK_PRODUCTS];
-  if (params.q) {
-    const q = params.q.toLowerCase();
-    filtered = filtered.filter((p) => p.name.toLowerCase().includes(q));
-  }
-  if (params.categoryId) {
-    filtered = filtered.filter((p) => String(p.category.id) === params.categoryId);
-  }
-  if (params.startDate) {
-    filtered = filtered.filter((p) => new Date(p.createdAt) >= new Date(params.startDate!));
-  }
-  if (params.endDate) {
-    filtered = filtered.filter((p) => new Date(p.createdAt) <= new Date(params.endDate!));
-  }
-  const limit = params.limit ?? 12;
-  const cursorIndex = params.cursor ? filtered.findIndex((p) => p.id === params.cursor) + 1 : 0;
-  const page = filtered.slice(cursorIndex, cursorIndex + limit);
-  const nextCursor = cursorIndex + limit < filtered.length ? page[page.length - 1]?.id ?? null : null;
-  return { data: page, nextCursor };
-}
-
-async function getCategories(): Promise<CategoriesResponse> {
-  await new Promise((r) => setTimeout(r, 200));
-  return { data: MOCK_CATEGORIES };
-}
+import {
+  getProducts,
+  getCategories,
+  type Category,
+  type Product,
+} from "./api";
 
 // ---------------------------------------------------------------------------
 // Helpers
